@@ -6,7 +6,12 @@ GIT_ARGS=""
 
 
 usage() {
-	echo No help message yet...
+	echo -e "Usage: $0 <OPTIONS>... [-- <GIT_CLONE_ADDITIONAL_OPTIONS>...]"
+	echo -e "\nRequired options:"
+	echo -e "\t-u | --user <USERNAME> - GitHub username of the user to clone repos for"
+	echo -e "\nOther options:"
+	echo -e "\t-h | --help - Display this message"
+
 	exit 0
 }
 
