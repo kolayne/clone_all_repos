@@ -18,14 +18,14 @@ usage() {
 	echo -e "\t-u | --user <USERNAME> - GitHub username of either organization or user to clone repos of."
 
 	echo -e "\nOther options:"
+	echo -e "\t-t | --token <TOKEN> - GitHub personal access token FOR THE USER <USERNAME>. " -n
+	echo -e "Given the correct permissions, the token will give access to private repos/organizations"
 	echo -e "\t--no-forks - Do not clone repos that are forks"
 	echo -e "\t-E | --include-explicitly-accessible - Clone not only repositories owned by user but all " -n
 	echo -e "the repos user has explicit permissions (read,write,admin) to access (quoted from github)"
 	echo -e "\t-O | --include-organizations - If <USERNAME> is a user, then clone not only repositories " -n
 	echo -e "owned by it, but also those owned by organizations that the user belongs to. If <USERNAME> " -n
 	echo -e "is an organization, this is an error. If token is not specified, this is an error"
-	echo -e "\t-t | --token - GitHub personal access token FOR THE USER <USERNAME>. " -n
-	echo -e "Given the correct permissions, the token will give access to private repos/organizations"
 	echo -e "\t-h | --help - Display this message"
 
 	echo -e "\nWhen cloning, \"GIT_CLONE_ADDITIONAL_OPTIONS\" will be passed to \`git clone\` before the " -n
