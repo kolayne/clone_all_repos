@@ -14,7 +14,7 @@ Basic example:
 cd path/where/to/clone/repos
 
 # Run the script
-path/to/clone_all_repos/clone_all_repos.sh --user USERNAME
+path/to/clone_all_repos/clone_all_repos.sh --user USERNAME_IN_lowercase
 ```
 
 You can also specify additional arguments to `git clone`:
