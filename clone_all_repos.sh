@@ -73,11 +73,8 @@ parse_args() {
 		die "GitHub username must be specified (with --user)"
 	fi
 
-	if [[ -z "$GH_TOKEN" ]]; then
-		[[ "$CLONE_EXPLICITLY_ACCESSIBLE" = true ]] && \
-			die "Cannot clone explicitly accessible without token specified"
-		[[ "$INCLUDE_ORGANIZATIONS" = true ]] && die "Cannot include organizations without token specified"
-	fi
+	[[ -z "$GH_TOKEN" ]] && [[ "$CLONE_EXPLICITLY_ACCESSIBLE" = true ]] && \
+		die "Cannot clone explicitly accessible without token specified"
 }
 
 
@@ -93,7 +90,7 @@ get_full_names_of_repos_from_json() {
 	JQ_FILTER="$JQ_FILTER | .full_name"
 
 	# Output of below is the return value
-	echo "$1" | jq -re "$JQ_FILTER"
+	echo "$1" | jq -er "$JQ_FILTER"
 }
 
 
@@ -116,7 +113,13 @@ list_repos_of_user() {
 }
 
 list_repos_of_organizations() {
-	ORGS_URLS=$(curl -u "$GH_USERNAME:$GH_TOKEN" https://api.github.com/user/orgs | jq -er '.[].url') || \
+	if [[ -z "$GH_TOKEN" ]]; then
+		WHAT_TO_CURL="https://api.github.com/users/$GH_USERNAME/orgs"
+	else
+		WHAT_TO_CURL="-u $GH_USERNAME:$GH_TOKEN https://api.github.com/user/orgs"
+	fi
+
+	ORGS_URLS=$(curl $WHAT_TO_CURL | jq -er '.[].url') || \
 		die "Couldn't retrieve the list of organizations. Are the token permissions correct?"
 
 	# Output of below is the return value
