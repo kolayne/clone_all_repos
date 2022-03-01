@@ -2,15 +2,22 @@
 
 CLONE_ROOT_DIR="."
 GH_USERNAME=""
+CLONE_FORKS=true
+
 GIT_ARGS=""
 
 
 usage() {
 	echo -e "Usage: $0 <OPTIONS>... [-- <GIT_CLONE_ADDITIONAL_OPTIONS>...]"
+
 	echo -e "\nRequired options:"
 	echo -e "\t-u | --user <USERNAME> - GitHub username of the user to clone repos for"
+
 	echo -e "\nOther options:"
+	echo -e "\t--no-forks - Do not clone repos that are forks"
 	echo -e "\t-h | --help - Display this message"
+
+	echo -e "\nWhen cloning, the following command will be invoked: \`git clone <GIT_CLONE_ADDITIONAL_OPTIONS> <REPO_CLONE_URL>\`"
 
 	exit 0
 }
@@ -26,8 +33,9 @@ parse_args() {
 		case "$1" in
 			-h | --help) usage ;;
 			-u | --user) shift; GH_USERNAME="$1" ;;
+			--no-forks) CLONE_FORKS=false ;;
 			--) shift; GIT_ARGS=$@; break ;;  # The rest is additional arguments to `git clone`
-			*) die Unknown argument "$1" ;;
+			*) die "Unknown argument $1" ;;
 		esac
 
 		shift
@@ -44,12 +52,19 @@ main() {
 
 	cd $CLONE_ROOT_DIR || die "Clone root directory does not exist"
 	mkdir -p "$GH_USERNAME" && cd "$GH_USERNAME" || die "Failed to create directory for the username"
-	CLONE_URLS=$(curl "https://api.github.com/users/$GH_USERNAME/repos" | jq  -er '.[].ssh_url') || \
+
+	JQ_FILTER=".[]"
+	if [[ "$CLONE_FORKS" = false ]]; then
+		JQ_FILTER="$JQ_FILTER | select(.fork == false)"
+	fi
+	JQ_FILTER="$JQ_FILTER | .ssh_url"
+
+	CLONE_URLS=$(curl "https://api.github.com/users/$GH_USERNAME/repos" | jq  -er "$JQ_FILTER") || \
 		die "Couldn't retrieve the repositories list. Is the username correct?"
 
 	for repo_clone_url in $CLONE_URLS; do
 		git clone $GIT_ARGS "$repo_clone_url" || \
-			echo "Failed to clone repo $repo_clone_url. Trying to continue..." >&2
+			echo "FAILED TO CLONE repo $repo_clone_url. Trying to continue..." >&2
 	done
 }
 
