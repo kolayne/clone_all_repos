@@ -1,3 +1,3 @@
 - Choose to clone via HTTP/SSH
-- Add an option to also clone organizations' repos
 - Let user choose the root clone directory
+- Pull already cloned repos to maintain up-to-date archive?
