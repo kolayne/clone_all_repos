@@ -7,6 +7,7 @@ SNAPSHOT_ROOT_DIR=""
 CLONE_FORKS=true
 CLONE_EXPLICITLY_ACCESSIBLE=false
 INCLUDE_ORGANIZATIONS=false
+PROTOCOL=SSH
 
 GIT_ARGS=""
 
@@ -16,7 +17,7 @@ usage() {
 
 	echo -e "\nRequired options:"
 	echo -e "\t-u | --user <USERNAME> - GitHub username of either organization or user to clone repos of."
-	echo -e "-o | --output-dir <SNAPSHOT_ROOT_DIR> - The root directory of a snapshot"
+	echo -e "\t-o | --output-dir <SNAPSHOT_ROOT_DIR> - The root directory of a snapshot"
 
 	echo -e "\nOther options:"
 	echo -ne "\t-t | --token <TOKEN> - GitHub personal access token FOR THE USER <USERNAME>. "
@@ -27,6 +28,8 @@ usage() {
 	echo -ne "\t-O | --include-organizations - If <USERNAME> is a user, then clone not only repositories "
 	echo -ne "owned by it, but also those owned by organizations that the user belongs to. If <USERNAME> "
 	echo -e "is an organization, this is an error. If token is not specified, this is an error"
+	echo -ne "\t--http[s] - Clone repos via HTTPS instead of SSH. If private repos are to be cloned (with "
+	echo -e "a token), this token will be used for the cloning itself"
 	echo -e "\t-h | --help - Display this message"
 
 	echo -ne "\nWhen cloning, \"GIT_CLONE_ADDITIONAL_OPTIONS\" will be passed to \`git clone\` before the "
@@ -56,15 +59,16 @@ parse_args() {
 				[[ ! -d "$1" ]] && die "$1 does not exist, is not a directory or inaccessible"
 				;;
 
-			--no-forks) CLONE_FORKS=false ;;
-			-E | --include-explicitly-accessible) CLONE_EXPLICITLY_ACCESSIBLE=true ;;
-			-O | --include-organizations) INCLUDE_ORGANIZATIONS=true ;;
-
 			-t | --token)
 				shift
 				GH_TOKEN="$1"
 				[[ "${1:0:1}" = "-" ]] && die "Invalid token $1 (can't start with a hyphen)"
 				;;
+
+			--no-forks) CLONE_FORKS=false ;;
+			-E | --include-explicitly-accessible) CLONE_EXPLICITLY_ACCESSIBLE=true ;;
+			-O | --include-organizations) INCLUDE_ORGANIZATIONS=true ;;
+			--http | --https) PROTOCOL=HTTPS ;;
 
 			-h | --help) usage ;;
 
@@ -139,9 +143,12 @@ list_repos_of_organizations() {
 
 # $1 must be the list of full names of repos to clone. Will clone to current directory
 clone_repos_by_full_name() {
+	URL_PREFIX="git@github.com:"
+	[[ "$PROTOCOL" = "HTTPS" ]] && URL_PREFIX="https://$GH_USERNAME:$GH_TOKEN@github.com/"
+
 	for repo_full_name in $1; do
 		# Only SSH cloning is supported at the moment
-		git clone $GIT_ARGS "git@github.com:$repo_full_name.git" "$repo_full_name" || \
+		git clone $GIT_ARGS "$URL_PREFIX$repo_full_name.git" "$repo_full_name" || \
 			echo "FAILED TO CLONE repo $repo_full_name. Trying to continue..." >&2
 	done
 }

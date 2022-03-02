@@ -31,6 +31,7 @@ All arguments at once:
         --token GITHUB_ACCESS_TOKEN  `# Gives access to private repos/orgs, details below` \
         --include-explicitly-accessible  `# Clone also repos USERNAME has explicit access to` \
         --include-organizations  `# Clone also repos of organizations that USERNAME belongs to` \
+        --https  `# Use HTTPS instead of SSH when cloning. For private repos token will be used` \
         --  `# Everything after this is forwarded to git clone, for example:` \
         --quiet  `# Do not show cloning progress` \
         --depth 1  `# Only get the current state of the repo, not the whole commits history`

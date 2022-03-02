@@ -1,1 +1,0 @@
-- Choose to clone via HTTP/SSH
