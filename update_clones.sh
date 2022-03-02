@@ -1,6 +1,6 @@
 #!/bin/bash
 
-source common.sh
+source "$(dirname $0)/common.sh"
 
 GIT_CMD=""
 SNAPSHOT_ROOT_DIR=""
@@ -28,6 +28,9 @@ parse_args() {
 
 	[[ -z "$2" ]] && \
 		die "You have to specify the snapshot root directory as the second argument"
+	[[ "${2:0:1}" = "-" ]] && \
+		die "The directory name $2 starts with a hyphen. Did you really mean that? If so, \
+make it ./$2"
 
 	SNAPSHOT_ROOT_DIR="$2"
 

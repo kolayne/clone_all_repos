@@ -1,6 +1,6 @@
 #!/bin/bash
 
-source common.sh
+source "$(dirname $0)/common.sh"
 
 GH_USERNAME=""
 GH_TOKEN=""
@@ -55,6 +55,9 @@ parse_args() {
 				shift
 				SNAPSHOT_ROOT_DIR="$1"
 				[[ -z "$1" ]] && die "Snapshot root directory must be specified (with --output-dir)"
+				[[ "${1:0:1}" = "-" ]] && \
+					die "The directory name $1 starts with a hyphen. Did you really mean that? \
+If so, make it ./$1"
 				;;
 
 			-t | --token)
