@@ -1,2 +1,1 @@
 - Choose to clone via HTTP/SSH
-- Let user choose the root clone directory

@@ -17,19 +17,16 @@ This repo conatins `bash` scripts that will run on a machine with `curl`, `git` 
 ### Create first snapshot
 
 Basic/minimal example: clones all public repositories of either user or organization \<USERNAME\> to the
-directory:
+current directory:
 ```bash
-# Go to the directory where to clone
-cd path/to/snapshot/root/directory  # Subfolders for users/organizations will be created here
-
-# Run the script
-path/to/project/clone_all_repos.sh -u USERNAME
+path/to/project/clone_all_repos.sh -u USERNAME -o .
 ```
 
 All arguments at once:
 ```bash
 ../clone_all_repos/clone_all_repos.sh \
         --user USERNAME  `# Clone repos of USERNAME` \
+        --output-directory path/to/snapshot/root/directory  `# Where to store the snapshot` \
         --no-forks  `# Do not clone repos that are forks` \
         --token GITHUB_ACCESS_TOKEN  `# Gives access to private repos/orgs, details below` \
         --include-explicitly-accessible  `# Clone also repos USERNAME has explicit access to` \

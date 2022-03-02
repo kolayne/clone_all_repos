@@ -3,7 +3,7 @@
 GH_USERNAME=""
 GH_TOKEN=""
 
-SNAPSHOT_ROOT_DIR="."
+SNAPSHOT_ROOT_DIR=""
 CLONE_FORKS=true
 CLONE_EXPLICITLY_ACCESSIBLE=false
 INCLUDE_ORGANIZATIONS=false
@@ -16,6 +16,7 @@ usage() {
 
 	echo -e "\nRequired options:"
 	echo -e "\t-u | --user <USERNAME> - GitHub username of either organization or user to clone repos of."
+	echo -e "-o | --output-dir <SNAPSHOT_ROOT_DIR> - The root directory of a snapshot"
 
 	echo -e "\nOther options:"
 	echo -ne "\t-t | --token <TOKEN> - GitHub personal access token FOR THE USER <USERNAME>. "
@@ -35,7 +36,7 @@ usage() {
 }
 
 die() {
-	echo "$1" >&2
+	echo "$(basename $0): $1" >&2
 	exit 1
 }
 
@@ -47,6 +48,12 @@ parse_args() {
 				shift
 				GH_USERNAME="$1"
 				[[ "${1:0:1}" = "-" ]] && die "Invalid username $1 (can't start with a hyphen)"
+				;;
+
+			-o | --output-dir)
+				shift
+				SNAPSHOT_ROOT_DIR="$1"
+				[[ ! -d "$1" ]] && die "$1 does not exist, is not a directory or inaccessible"
 				;;
 
 			--no-forks) CLONE_FORKS=false ;;
@@ -69,10 +76,8 @@ parse_args() {
 		shift
 	done
 
-	if [[ -z "$GH_USERNAME" ]]; then
-		die "GitHub username must be specified (with --user)"
-	fi
-
+	[[ -z "$GH_USERNAME" ]] && die "GitHub username must be specified (with --user)"
+	[[ -z "$SNAPSHOT_ROOT_DIR" ]] && die "Snapshot root directory must be specified (with --output-dir)"
 	[[ -z "$GH_TOKEN" ]] && [[ "$CLONE_EXPLICITLY_ACCESSIBLE" = true ]] && \
 		die "Cannot clone explicitly accessible without token specified"
 }
@@ -110,7 +115,7 @@ list_repos_of_user() {
 
 	# Output of below is the return value
 	get_full_names_of_repos_from_json "$REPOS_JSON" "$OWNER_FILTER" || \
-		die "Failed to parse JSON. Incorrect token?"
+		die "Failed to parse JSON. Incorrect username/token?"
 }
 
 list_repos_of_organizations() {
