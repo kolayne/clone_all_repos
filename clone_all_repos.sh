@@ -1,5 +1,7 @@
 #!/bin/bash
 
+source common.sh
+
 GH_USERNAME=""
 GH_TOKEN=""
 
@@ -36,11 +38,6 @@ usage() {
 	echo -e "arguments denoting url and output directory"
 
 	exit 0
-}
-
-die() {
-	echo "$(basename $0): $1" >&2
-	exit 1
 }
 
 

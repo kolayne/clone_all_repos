@@ -1,5 +1,7 @@
 #!/bin/bash
 
+source common.sh
+
 GIT_CMD=""
 SNAPSHOT_ROOT_DIR=""
 ADDITIONAL_GIT_ARGS=""
