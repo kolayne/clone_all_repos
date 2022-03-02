@@ -1,5 +1,7 @@
 # Clone All Repos
 
+[![Codacy Badge](https://api.codacy.com/project/badge/Grade/f0e3a770a8f34710bbf0a8ea5028d1e2)](https://app.codacy.com/gh/kolayne/clone_all_repos?utm_source=github.com&utm_medium=referral&utm_content=kolayne/clone_all_repos&utm_campaign=Badge_Grade_Settings)
+
 A tool to create and maintain snapshots of all GitHub repositories, related to a user.
 
 It is useful in cases when you want to have an additional backup of the data you have in GitHub, for example,
