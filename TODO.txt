@@ -1,3 +1,2 @@
 - Choose to clone via HTTP/SSH
 - Let user choose the root clone directory
-- [docs]: "root clone directory" sounds awful, "snapshot root directory" is much better

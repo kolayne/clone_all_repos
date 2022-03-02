@@ -3,7 +3,7 @@
 GH_USERNAME=""
 GH_TOKEN=""
 
-CLONE_ROOT_DIR="."
+SNAPSHOT_ROOT_DIR="."
 CLONE_FORKS=true
 CLONE_EXPLICITLY_ACCESSIBLE=false
 INCLUDE_ORGANIZATIONS=false
@@ -61,7 +61,7 @@ parse_args() {
 
 			-h | --help) usage ;;
 
-			--) shift; GIT_ARGS=$@; break ;;  # The rest is additional arguments to `git clone`
+			--) shift; GIT_ARGS="$@"; break ;;  # The rest is additional arguments to `git clone`
 
 			*) die "Unknown argument $1" ;;
 		esac
@@ -153,7 +153,8 @@ clone_all_needed_repos() {
 	# to duplicate things twice
 	REPOS_LIST=$(echo "$REPOS_LIST" | sort | uniq) || die '`... | sort | uniq` failed. Wtf?..'
 
-	mkdir -p "$CLONE_ROOT_DIR" && cd "$CLONE_ROOT_DIR" || die "Failed to go to the clone root directory"
+	mkdir -p "$SNAPSHOT_ROOT_DIR" && cd "$SNAPSHOT_ROOT_DIR" || \
+		die "Failed to enter the snapshot root directory"
 
 	clone_repos_by_full_name "$REPOS_LIST"
 }

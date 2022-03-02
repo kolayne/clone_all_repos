@@ -1,15 +1,15 @@
 #!/bin/bash
 
 GIT_CMD=""
-ROOT_CLONE_DIR=""
+SNAPSHOT_ROOT_DIR=""
 ADDITIONAL_GIT_ARGS=""
 
 
 usage() {
-	echo -e "Usage: $0 [--help] pull|fetch <ROOT_CLONE_DIRECTORY> [<ADDITIONAL_GIT_ARGS>...]"
+	echo -e "Usage: $0 [--help] pull|fetch <SNAPSHOT_ROOT_DIRECTORY> [<ADDITIONAL_GIT_ARGS>...]"
 
 	echo -ne "\nThis will either pull or fetch all the repositories located in "
-	echo -e "<ROOT_CLONE_DIRECTORY> (not recursively, only the first-level subdirectories)"
+	echo -e "<SNAPSHOT_ROOT_DIRECTORY> (not recursively, only the first-level subdirectories)"
 
 	exit 0
 }
@@ -24,7 +24,7 @@ parse_args() {
 		die "The first argument must be either pull or fetch"
 	fi
 
-	ROOT_CLONE_DIR="$2"
+	SNAPSHOT_ROOT_DIR="$2"
 
 	shift 2
 
@@ -34,7 +34,7 @@ parse_args() {
 
 main() {
 	parse_args "$@"
-	cd "$ROOT_CLONE_DIR" || die "Failed to enter the directory $ROOT_CLONE_DIR"
+	cd "$SNAPSHOT_ROOT_DIR" || die "Failed to enter the directory $SNAPSHOT_ROOT_DIR"
 
 	for subdir in */*/; do
 		pushd "$subdir" && git "$GIT_CMD" $ADDITIONAL_GIT_ARGS || \
