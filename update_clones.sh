@@ -26,6 +26,9 @@ parse_args() {
 		die "The first argument must be either pull or fetch"
 	fi
 
+	[[ -z "$2" ]] && \
+		die "You have to specify the snapshot root directory as the second argument"
+
 	SNAPSHOT_ROOT_DIR="$2"
 
 	shift 2

@@ -47,13 +47,14 @@ parse_args() {
 			-u | --user)
 				shift
 				GH_USERNAME="$1"
+				[[ -z "$1" ]] && die "GitHub username must be specified (with --user)"
 				[[ "${1:0:1}" = "-" ]] && die "Invalid username $1 (can't start with a hyphen)"
 				;;
 
 			-o | --output-dir)
 				shift
 				SNAPSHOT_ROOT_DIR="$1"
-				[[ ! -d "$1" ]] && die "$1 does not exist, is not a directory or inaccessible"
+				[[ -z "$1" ]] && die "Snapshot root directory must be specified (with --output-dir)"
 				;;
 
 			-t | --token)
@@ -77,9 +78,7 @@ parse_args() {
 		shift
 	done
 
-	[[ -z "$GH_USERNAME" ]] && die "GitHub username must be specified (with --user)"
-	[[ -z "$SNAPSHOT_ROOT_DIR" ]] && die "Snapshot root directory must be specified (with --output-dir)"
-	[[ -z "$GH_TOKEN" ]] && [[ "$CLONE_EXPLICITLY_ACCESSIBLE" = true ]] && \
+	[[ -z "$GH_TOKEN" && "$CLONE_EXPLICITLY_ACCESSIBLE" = true ]] && \
 		die "Cannot clone explicitly accessible without token specified"
 }
 
