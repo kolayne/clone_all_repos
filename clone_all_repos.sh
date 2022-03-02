@@ -18,17 +18,17 @@ usage() {
 	echo -e "\t-u | --user <USERNAME> - GitHub username of either organization or user to clone repos of."
 
 	echo -e "\nOther options:"
-	echo -e "\t-t | --token <TOKEN> - GitHub personal access token FOR THE USER <USERNAME>. " -n
+	echo -ne "\t-t | --token <TOKEN> - GitHub personal access token FOR THE USER <USERNAME>. "
 	echo -e "Given the correct permissions, the token will give access to private repos/organizations"
 	echo -e "\t--no-forks - Do not clone repos that are forks"
-	echo -e "\t-E | --include-explicitly-accessible - Clone not only repositories owned by user but all " -n
+	echo -ne "\t-E | --include-explicitly-accessible - Clone not only repositories owned by user but all "
 	echo -e "the repos user has explicit permissions (read,write,admin) to access (quoted from github)"
-	echo -e "\t-O | --include-organizations - If <USERNAME> is a user, then clone not only repositories " -n
-	echo -e "owned by it, but also those owned by organizations that the user belongs to. If <USERNAME> " -n
+	echo -ne "\t-O | --include-organizations - If <USERNAME> is a user, then clone not only repositories "
+	echo -ne "owned by it, but also those owned by organizations that the user belongs to. If <USERNAME> "
 	echo -e "is an organization, this is an error. If token is not specified, this is an error"
 	echo -e "\t-h | --help - Display this message"
 
-	echo -e "\nWhen cloning, \"GIT_CLONE_ADDITIONAL_OPTIONS\" will be passed to \`git clone\` before the " -n
+	echo -ne "\nWhen cloning, \"GIT_CLONE_ADDITIONAL_OPTIONS\" will be passed to \`git clone\` before the "
 	echo -e "arguments denoting url and output directory"
 
 	exit 0
@@ -109,7 +109,8 @@ list_repos_of_user() {
 	fi
 
 	# Output of below is the return value
-	get_full_names_of_repos_from_json "$REPOS_JSON" "$OWNER_FILTER" || die "Failed to parse JSON"
+	get_full_names_of_repos_from_json "$REPOS_JSON" "$OWNER_FILTER" || \
+		die "Failed to parse JSON. Incorrect token?"
 }
 
 list_repos_of_organizations() {
@@ -126,7 +127,8 @@ list_repos_of_organizations() {
 	for org_url in $ORGS_URLS; do
 		REPOS_JSON=$(curl -u "$GH_USERNAME:$GH_TOKEN" "$org_url"/repos) || \
 			die "Couldn't retrieve the repositories of organization $org_url"
-		get_full_names_of_repos_from_json "$REPOS_JSON" || die "Failed to parse JSON"
+		get_full_names_of_repos_from_json "$REPOS_JSON" || \
+			die "Failed to parse JSON. Insufficient token permissions?"
 	done
 }
 

@@ -14,17 +14,17 @@ Basic/minimal example: clones all public repositories of either user or organiza
 cd path/to/root/clone/directory  # Subfolders for users/organizations will be created here
 
 # Run the script
-path/to/project/clone_all_repos.sh --user USERNAME
+path/to/project/clone_all_repos.sh -u USERNAME
 ```
 
 All arguments at once:
 ```bash
 ../clone_all_repos/clone_all_repos.sh \
         --user USERNAME  `# Clone repos of USERNAME` \
-        --no-fork  `# Do not clone repos that are forks` \
+        --no-forks  `# Do not clone repos that are forks` \
         --token <github_access_token>  `# Gives access to private repos/orgs, details below` \
         --include-explicitly-accessible  `# Clone also repos USERNAME has explicit access to` \
-        -- include-organizations  `# Clone also repos of organizations that USERNAME belongs to` \
+        --include-organizations  `# Clone also repos of organizations that USERNAME belongs to` \
         --  `# Everything after this is forwarded to git clone, for example:` \
         --quiet  `# Do not show cloning progress` \
         --depth 1  `# Only get the current state of the repo, not the whole commits history`
