@@ -1,3 +1,5 @@
+#!/bin/false
+
 # Common functions that are used by several scripts
 
 die() {
