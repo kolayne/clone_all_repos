@@ -26,10 +26,11 @@ usage() {
 	echo -e "Given the correct permissions, the token will give access to private repos/organizations"
 	echo -e "\t--no-forks - Do not clone repos that are forks"
 	echo -ne "\t-E | --include-explicitly-accessible - Clone not only repositories owned by user but all "
-	echo -e "the repos user has explicit permissions (read,write,admin) to access (quoted from github)"
+	echo -ne "the repos user has explicit permissions (read,write,admin) to access (quoted from github). "
+	echo -e "If token is not specified, this is an error"
 	echo -ne "\t-O | --include-organizations - If <USERNAME> is a user, then clone not only repositories "
 	echo -ne "owned by it, but also those owned by organizations that the user belongs to. If <USERNAME> "
-	echo -e "is an organization, this is an error. If token is not specified, this is an error"
+	echo -e "is an organization, this is an error"
 	echo -ne "\t--http[s] - Clone repos via HTTPS instead of SSH. If private repos are to be cloned (with "
 	echo -e "a token), this token will be used for the cloning itself"
 	echo -e "\t-h | --help - Display this message"
@@ -83,6 +84,8 @@ If so, make it ./$1"
 
 	[[ -z "$GH_TOKEN" && "$CLONE_EXPLICITLY_ACCESSIBLE" = true ]] && \
 		die "Cannot clone explicitly accessible without token specified"
+
+	[[ -z "$SNAPSHOT_ROOT_DIR" ]] && die "Output dir must be specified"
 }
 
 
