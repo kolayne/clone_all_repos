@@ -111,6 +111,8 @@ list_repos_of_user() {
 	else
 		WHAT_TO_CURL="-u $GH_USERNAME:$GH_TOKEN https://api.github.com/user/repos"
 	fi
+    # TODO: make it possible to clone more than 100 repos
+    WHAT_TO_CURL="$WHAT_TO_CURL?per_page=100"  # 100 is a github api per-page limit
 
 	REPOS_JSON=$(curl $WHAT_TO_CURL) || \
 		die "Couldn't retrieve the repositories list. Are the username/token correct?"
@@ -130,6 +132,8 @@ list_repos_of_organizations() {
 	else
 		WHAT_TO_CURL="-u $GH_USERNAME:$GH_TOKEN https://api.github.com/user/orgs"
 	fi
+    # TODO: make it possible to clone more than 100 repos
+    WHAT_TO_CURL="$WHAT_TO_CURL?per_page=100"  # 100 is a github api per-page limit
 
 	ORGS_URLS=$(curl $WHAT_TO_CURL | jq -er '.[].url') || \
 		die "Couldn't retrieve the list of organizations. Are the token permissions correct?"
