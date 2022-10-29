@@ -89,7 +89,7 @@ If so, make it ./$1"
 }
 
 
-# $1 must be a json array of repos; if $2 is not empty, only repos with owner login "$2" will be returned
+# $1 must be a json array of repos; if $2 is not empty, only repos with owner username "$2" will be returned
 get_full_names_of_repos_from_json() {
 	JQ_FILTER=".[]"
 	if [[ "$CLONE_FORKS" = false ]]; then
@@ -153,7 +153,6 @@ clone_repos_by_full_name() {
 	[[ "$PROTOCOL" = "HTTPS" ]] && URL_PREFIX="https://$GH_USERNAME:$GH_TOKEN@github.com/"
 
 	for repo_full_name in $1; do
-		# Only SSH cloning is supported at the moment
 		git clone $GIT_ARGS "$URL_PREFIX$repo_full_name.git" "$repo_full_name" || \
 			echo "FAILED TO CLONE repo $repo_full_name. Trying to continue..." >&2
 	done
@@ -168,7 +167,7 @@ clone_all_needed_repos() {
 	fi
 
 	# If both organizations and explcitily-accessible are included, there may be collisions. We don't want
-	# to duplicate things twice
+	# to duplicate things
 	REPOS_LIST=$(echo "$REPOS_LIST" | sort | uniq) || die '`... | sort | uniq` failed. Wtf?..'
 
 	mkdir -p "$SNAPSHOT_ROOT_DIR" && cd "$SNAPSHOT_ROOT_DIR" || \
