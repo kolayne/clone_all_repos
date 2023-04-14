@@ -2,11 +2,7 @@
 
 A tool to create and maintain snapshots of all GitHub repositories, related to a user.
 
-It is useful in cases when you want to have an additional backup of the data you have in GitHub, for example,
-in case your country's government has spontaneously decided to unleash a war against Ukraine and, thanks to
-that, all the citizens are now under the risk of being banned by various foreign services.
-
-By the way, I take this opportunity to express my position: #NoToWar / #НетВойне
+It is useful in cases when you want to have an additional backup of the data you have on GitHub.
 
 ## Requirements
 
