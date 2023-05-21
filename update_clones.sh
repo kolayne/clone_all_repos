@@ -8,7 +8,7 @@ ADDITIONAL_GIT_ARGS=""
 
 
 usage() {
-	echo -e "Usage: $0 [--help] pull|fetch <SNAPSHOT_ROOT_DIRECTORY> [<ADDITIONAL_GIT_ARGS>...]"
+	echo -e "Usage: $0 [-h|--help] pull|fetch <SNAPSHOT_ROOT_DIRECTORY> [<ADDITIONAL_GIT_ARGS>...]"
 
 	echo -ne "\nThis will either pull or fetch all the repositories located in "
 	echo -e "<SNAPSHOT_ROOT_DIRECTORY> (not recursively, only the first-level subdirectories)"
@@ -18,7 +18,7 @@ usage() {
 
 
 parse_args() {
-	[[ "$1" = "--help" || "$2" = "--help" ]] && usage
+	[[ "$1" = "--help" || "$1" = "-h" || "$2" = "--help" || "$2" = "-h" ]] && usage
 
 	if [[ "$1" = "fetch" || "$1" = "pull" ]]; then
 		GIT_CMD="$1"
