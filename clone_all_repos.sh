@@ -1,6 +1,6 @@
 #!/bin/bash
 
-source "$(dirname "$0")/common.sh"
+source "$(dirname "$0")/_common"
 
 GH_USERNAME=""
 GH_TOKEN=""
