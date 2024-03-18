@@ -1,19 +1,19 @@
 # Clone All Repos
 
-A tool to create and maintain snapshots of all GitHub repositories, related to a user.
+A tool to create and maintain snapshots of all GitHub repositories related to a user.
 
-It is useful in cases when you want to have an additional backup of the data you have on GitHub.
+It is useful in cases when you want to have an additional backup of data you keep on GitHub.
 
 ## Requirements
 
-This repo conatins `bash` scripts that will run on a machine with `curl`, `git` and `jq` installed.
+This repo conatins `bash` scripts that will run on a machine with `curl`, `git`, and `jq` installed.
 
 ## Running
 
 ### Create first snapshot
 
-Basic/minimal example: clones all public repositories of either user or organization \<USERNAME\> to the
-current directory:
+Basic/minimal example: clones all public repositories of either a user or an organization \<USERNAME\>
+to the current directory:
 ```bash
 ./clone_all_repos.sh -u USERNAME -o .
 ```
@@ -24,34 +24,33 @@ All arguments at once:
         --user USERNAME  `# Clone repos of USERNAME` \
         --output-directory path/to/snapshot/root/directory  `# Where to store the snapshot` \
         --no-forks  `# Do not clone repos that are forks` \
-        --token GITHUB_ACCESS_TOKEN  `# Gives access to private repos/orgs, details below` \
+        --token GITHUB_ACCESS_TOKEN  `# Gives access to private repos/orgs, see details in README` \
         --include-explicitly-accessible  `# Clone also repos USERNAME has explicit access to` \
         --include-organizations  `# Clone also repos of organizations that USERNAME belongs to` \
-        --https  `# Use HTTPS instead of SSH when cloning. For private repos token will be used` \
-        --  `# Everything after this is forwarded to git clone, for example:` \
+        --https  `# Use HTTPS instead of SSH when cloning. For private repos the token will be stored in the cloning URL!!` \
+        --  `# Everything after the double dash is forwarded to git clone, for example:` \
         --quiet  `# Do not show cloning progress` \
         --depth 1  `# Only get the current state of the repo, not the whole commits history`
 ```
 
 Note: arguments `--include-explicitly-accessible` and `--include-organizations` will only work if `USERNAME`
-is a login of a GitHub _user_, not an organization
+is a GitHub _user_, not an organization.
 
 ### Maintain the snapshot
 
 You might want to reuse an existing snapshot and only fetch new changes.
 
--   To download the **new repositories** that might have been created since the snapshot creation, just run
-    `clone_all_repos.sh` in the snapshot root directory. It will output errors for repositories that already
-    exist and download new ones that satisfy the query given in the arguments.
+1.  Since you created the snapshots, **new repositories** that match your conditions may have been created.
+    To add them to your snapshot, run `clone_all_repos.sh` again with desired arguments. It will output errors
+    for repositores that already exist and download new ones that match the query specified in the arguments.
 
--   To pull or fetch changes of **existing repositories** in a snapshot, run the `update_clones.sh` script!
-    For example:
+2.  To pull or fetch changes of repositories **already in the snapshot**, run `update_clones.sh`. For example:
     ```bash
     ./update_clones.sh pull path/to/snapshot/root/directory
     ```
     It will pull (or fetch, if you replace "pull" with "fetch") the remote changes of all the repos in the
-    snapshot. If you run `update_clones.sh` with more than 2 arguments, all the rest is forwarded to the
-    git clone/fetch command.
+    snapshot. If there is more than 2 arguments specified to `update_clones.sh`, all the remaining ones are
+    forwarded to the git pull/fetch command.
 
 ## Token
 
