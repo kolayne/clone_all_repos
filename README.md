@@ -15,12 +15,12 @@ This repo conatins `bash` scripts that will run on a machine with `curl`, `git` 
 Basic/minimal example: clones all public repositories of either user or organization \<USERNAME\> to the
 current directory:
 ```bash
-path/to/project/clone_all_repos.sh -u USERNAME -o .
+clone_all_repos.sh -u USERNAME -o .
 ```
 
 All arguments at once:
 ```bash
-../clone_all_repos/clone_all_repos.sh \
+clone_all_repos.sh \
         --user USERNAME  `# Clone repos of USERNAME` \
         --output-directory path/to/snapshot/root/directory  `# Where to store the snapshot` \
         --no-forks  `# Do not clone repos that are forks` \
@@ -47,7 +47,7 @@ You might want to reuse an existing snapshot and only fetch new changes.
 -   To pull or fetch changes of **existing repositories** in a snapshot, run the `update_clones.sh` script!
     For example:
     ```bash
-    /path/to/update_clones.sh pull path/to/snapshot/root/directory
+    update_clones.sh pull path/to/snapshot/root/directory
     ```
     It will pull (or fetch, if you replace "pull" with "fetch") the remote changes of all the repos in the
     snapshot. If you run `update_clones.sh` with more than 2 arguments, all the rest is forwarded to the
