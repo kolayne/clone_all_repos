@@ -153,8 +153,10 @@ clone_repos_by_full_name() {
 	[[ "$PROTOCOL" = "HTTPS" ]] && URL_PREFIX="https://$GH_USERNAME:$GH_TOKEN@github.com/"
 
 	for repo_full_name in $1; do
+		# TODO: handle the "fatal: path exists and not empty" case differently than
+		#       all other failures.
 		git clone $GIT_ARGS "$URL_PREFIX$repo_full_name.git" "$repo_full_name" || \
-			echo "FAILED TO CLONE repo $repo_full_name. Trying to continue..." >&2
+			echo "(continuing anyway)" >&2
 	done
 }
 
