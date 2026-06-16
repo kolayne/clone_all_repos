@@ -1,4 +1,5 @@
 #!/bin/sh
+# TODO: fix `parse_args` so that we can do `#!/bin/sh -e`
 
 source "$(dirname "$0")/_common"
 
@@ -105,16 +106,30 @@ get_full_names_of_repos_from_json() {
 }
 
 
+# Accepts `CURL_ARGS` and `CURL_URL`
+curl_pages_line_by_line() {
+	PAGE=1
+	while true; do
+		THIS_PAGE_RESP=$(curl $CURL_ARGS "$CURL_URL&page=$PAGE") || return
+		if echo "$THIS_PAGE_RESP" | jq -e '. == []' >/dev/null; then
+			break
+		fi
+		echo "$THIS_PAGE_RESP"
+		PAGE=$(($PAGE+1))
+	done
+}
+
 list_repos_of_user() {
 	if [[ -z "$GH_TOKEN" ]]; then
-		WHAT_TO_CURL="https://api.github.com/users/$GH_USERNAME/repos"
+		CURL_URL="https://api.github.com/users/$GH_USERNAME/repos"
 	else
-		WHAT_TO_CURL="-u $GH_USERNAME:$GH_TOKEN https://api.github.com/user/repos"
+		CURL_ARGS="-u $GH_USERNAME:$GH_TOKEN"
+		CURL_URL="https://api.github.com/user/repos"
 	fi
-    # TODO: make it possible to clone more than 100 repos
-    WHAT_TO_CURL="$WHAT_TO_CURL?per_page=100"  # 100 is a github api per-page limit
+	CURL_URL="$CURL_URL?per_page=100"  # 100 is a github api per-page limit
 
-	REPOS_JSON=$(curl $WHAT_TO_CURL) || \
+	echo RETRIEVING THE LIST OF THE ENTITY\'S REPOS >&2
+	REPOS_JSON=$(curl_pages_line_by_line | jq -s add) || \
 		die "Couldn't retrieve the repositories list. Are the username/token correct?"
 
 	if [[ "$CLONE_EXPLICITLY_ACCESSIBLE" = false ]]; then
@@ -128,19 +143,22 @@ list_repos_of_user() {
 
 list_repos_of_organizations() {
 	if [[ -z "$GH_TOKEN" ]]; then
-		WHAT_TO_CURL="https://api.github.com/users/$GH_USERNAME/orgs"
+		CURL_URL="https://api.github.com/users/$GH_USERNAME/orgs"
 	else
-		WHAT_TO_CURL="-u $GH_USERNAME:$GH_TOKEN https://api.github.com/user/orgs"
+		CURL_ARGS="-u $GH_USERNAME:$GH_TOKEN"
+		CURL_URL="https://api.github.com/user/orgs"
 	fi
-    # TODO: make it possible to clone more than 100 repos
-    WHAT_TO_CURL="$WHAT_TO_CURL?per_page=100"  # 100 is a github api per-page limit
+	CURL_URL="$CURL_URL?per_page=100"  # 100 is a github api per-page limit
 
-	ORGS_URLS=$(curl $WHAT_TO_CURL | jq -er '.[].url') || \
+	echo RETRIEVING LIST OF USER\'S ORGS >&2
+	ORGS_URLS=$(curl_pages_line_by_line | jq -s -er 'add.[].url') || \
 		die "Couldn't retrieve the list of organizations. Are the token permissions correct?"
 
 	# Output of below is the return value
 	for org_url in $ORGS_URLS; do
-		REPOS_JSON=$(curl -u "$GH_USERNAME:$GH_TOKEN" "$org_url"/repos) || \
+		CURL_URL="$org_url"/repos?per_page=100  # 100 is a github api per-page limit
+		echo RETRIEVING LIST OF AN ORG\'S REPOS >&2
+		REPOS_JSON=$(curl_pages_line_by_line | jq -s add) || \
 			die "Couldn't retrieve the repositories of organization $org_url"
 		get_full_names_of_repos_from_json "$REPOS_JSON" || \
 			die "Failed to parse JSON. Insufficient token permissions?"
