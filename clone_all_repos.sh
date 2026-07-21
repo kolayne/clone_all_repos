@@ -8,10 +8,13 @@ GH_TOKEN=""
 
 SNAPSHOT_ROOT_DIR=""
 CLONE_FORKS=true
+FORK_ADD_PARENT_REMOTE=false
 CLONE_EXPLICITLY_ACCESSIBLE=false
 INCLUDE_ORGANIZATIONS=false
 PROTOCOL=SSH
 
+CURL_ARGS=""
+CURL_UNIVERSAL_ARGS="--no-progress-meter"
 GIT_ARGS=""
 
 
@@ -26,6 +29,9 @@ usage() {
 	echo -ne "\t-t | --token <TOKEN> - GitHub personal access token FOR THE USER <USERNAME>. "
 	echo -e "Given the correct permissions, the token will give access to private repos/organizations"
 	echo -e "\t--no-forks - Do not clone repos that are forks"
+	echo -ne '\t-p | --fork-add-parent-remote - When cloning forks, also add a remote named `upstream` '
+	echo -ne 'that will point to the direct parent of the repository. Note that the `upstream` remote is '
+	echo -e 'not fetched automatically: you should use `foreach.sh`, see README.'
 	echo -ne "\t-E | --include-explicitly-accessible - Clone not only repositories owned by user but all "
 	echo -ne "the repos user has explicit permissions (read,write,admin) to access (quoted from github). "
 	echo -e "If token is not specified, this is an error"
@@ -69,6 +75,7 @@ If so, make it ./$1"
 				;;
 
 			--no-forks) CLONE_FORKS=false ;;
+			-p | --fork-add-parent-remote) FORK_ADD_PARENT_REMOTE=true ;;
 			-E | --include-explicitly-accessible) CLONE_EXPLICITLY_ACCESSIBLE=true ;;
 			-O | --include-organizations) INCLUDE_ORGANIZATIONS=true ;;
 			--http | --https) PROTOCOL=HTTPS ;;
@@ -110,9 +117,15 @@ get_full_names_of_repos_from_json() {
 curl_pages_line_by_line() {
 	PAGE=1
 	while true; do
-		THIS_PAGE_RESP=$(curl $CURL_ARGS "$CURL_URL&page=$PAGE") || return
+		THIS_PAGE_RESP=$(curl $CURL_UNIVERSAL_ARGS $CURL_ARGS "$CURL_URL&page=$PAGE") || return
 		if echo "$THIS_PAGE_RESP" | jq -e '. == []' >/dev/null; then
 			break
+		fi
+	  # Do not loop infinitely on failure
+		if echo "$THIS_PAGE_RESP" | jq -e 'type != "array"' >/dev/null; then
+			echo Unexpected response from GitHub API: >&2
+			echo "$THIS_PAGE_RESP" >&2
+			die "GitHub API interaction failed. Are the username/token valid?"
 		fi
 		echo "$THIS_PAGE_RESP"
 		PAGE=$(($PAGE+1))
@@ -123,7 +136,6 @@ list_repos_of_user() {
 	if [[ -z "$GH_TOKEN" ]]; then
 		CURL_URL="https://api.github.com/users/$GH_USERNAME/repos"
 	else
-		CURL_ARGS="-u $GH_USERNAME:$GH_TOKEN"
 		CURL_URL="https://api.github.com/user/repos"
 	fi
 	CURL_URL="$CURL_URL?per_page=100"  # 100 is a github api per-page limit
@@ -145,7 +157,6 @@ list_repos_of_organizations() {
 	if [[ -z "$GH_TOKEN" ]]; then
 		CURL_URL="https://api.github.com/users/$GH_USERNAME/orgs"
 	else
-		CURL_ARGS="-u $GH_USERNAME:$GH_TOKEN"
 		CURL_URL="https://api.github.com/user/orgs"
 	fi
 	CURL_URL="$CURL_URL?per_page=100"  # 100 is a github api per-page limit
@@ -171,15 +182,36 @@ clone_repos_by_full_name() {
 	[[ "$PROTOCOL" = "HTTPS" ]] && URL_PREFIX="https://$GH_USERNAME:$GH_TOKEN@github.com/"
 
 	for repo_full_name in $1; do
+		CURL_URL="https://api.github.com/repos/$repo_full_name"
+		REPO_DATA="$(curl $CURL_UNIVERSAL_ARGS $CURL_ARGS $CURL_URL)"
+		if [[ "$PROTOCOL" = "HTTPS" ]]; then
+			GIT_CLONE_URL="$(echo "$REPO_DATA" | jq -er '.git_url')"
+		else
+			GIT_CLONE_URL="$(echo "$REPO_DATA" | jq -er '.ssh_url')"
+		fi
 		# TODO: handle the "fatal: path exists and not empty" case differently than
 		#       all other failures.
 		git clone $GIT_ARGS "$URL_PREFIX$repo_full_name.git" "$repo_full_name" || \
-			echo "(continuing anyway)" >&2
+			{ echo "(continuing anyway)" >&2; continue; }
+
+		if echo "$REPO_DATA" | jq -e '.fork' >/dev/null && [[ "$FORK_ADD_PARENT_REMOTE" = true ]]; then
+			if [[ "$PROTOCOL" = "HTTPS" ]]; then
+				GIT_PARENT_CLONE_URL="$(echo "$REPO_DATA" | jq -er '.parent.git_url')"
+			else
+				GIT_PARENT_CLONE_URL="$(echo "$REPO_DATA" | jq -er '.parent.ssh_url')"
+			fi
+			git -C "$repo_full_name" remote add upstream "$GIT_PARENT_CLONE_URL" || \
+				{ echo "(continuing anyway)" >&2; continue; }
+		fi
 	done
 }
 
 
 clone_all_needed_repos() {
+	if [[ ! -z "$GH_TOKEN" ]]; then
+		CURL_ARGS="-u $GH_USERNAME:$GH_TOKEN"
+	fi
+
 	REPOS_LIST=$(list_repos_of_user) || die "Failed to list repositories of user"
 	if [[ "$INCLUDE_ORGANIZATIONS" = true ]]; then
 		REPOS_LIST="$REPOS_LIST"$'\n'$(list_repos_of_organizations) ||
