@@ -42,6 +42,7 @@ main() {
 	cd "$SNAPSHOT_ROOT_DIR" || die "Failed to enter the directory $SNAPSHOT_ROOT_DIR"
 
 	for subdir in */*/; do
+		echo "Running at $subdir :" >&2
 		git -C "$subdir" $GIT_ARGS || \
 			echo "Command failed for $subdir. Trying to continue..."
 	done
